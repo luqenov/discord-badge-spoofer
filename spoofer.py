@@ -38,6 +38,12 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Iterator, Sequence
 
+for stream in (sys.stdout, sys.stderr):
+    try:
+        stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):
+        pass
+
 # paths
 ROOT = Path(__file__).resolve().parent
 GAMES_FILE = ROOT.parent / "data" / "games.json"     # full game list, downloaded if absent
@@ -236,7 +242,7 @@ class Console:
 
     def __init__(self) -> None:
         try:
-            sys.stdout.reconfigure(encoding="utf-8")  # glyphs must encode even when stdout is piped
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # glyphs must encode even when stdout is piped
         except Exception:
             pass
         if sys.platform == "win32":
@@ -825,7 +831,7 @@ class App:
         self.state.total_games_claimed += ok
         self.state.total_hours_claimed += ok * hours
         self.state.save()
-        
+
         C.rule()
         input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
         C.rule()
